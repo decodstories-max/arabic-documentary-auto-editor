@@ -1,0 +1,79 @@
+name: HyperFrames + GSAP smoke render
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "index.html"
+      - "package.json"
+      - ".github/workflows/hyperframes-smoke.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-render:
+    name: Install, diagnose, lint and render
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out test repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+
+      - name: Install pinned GSAP dependency
+        run: npm install --no-audit --no-fund
+
+      - name: Record tool versions
+        run: |
+          node --version
+          npm --version
+          ffmpeg -version | head -n 2
+          npx --yes hyperframes@latest info
+
+      - name: Ensure HyperFrames browser runtime
+        run: npx --yes hyperframes@latest browser ensure
+
+      - name: Run HyperFrames environment diagnostics
+        run: npx --yes hyperframes@latest doctor --json
+
+      - name: Lint the smoke composition
+        run: npx --yes hyperframes@latest lint ./index.html --json
+
+      - name: Render five-second 30 fps MP4
+        run: |
+          mkdir -p renders
+          npx --yes hyperframes@latest render \
+            --composition ./index.html \
+            --output ./renders/hyperframes-gsap-smoke.mp4 \
+            --fps 30 \
+            --quality standard \
+            --workers 1
+
+      - name: Verify MP4 metadata and playback structure
+        run: |
+          test -s ./renders/hyperframes-gsap-smoke.mp4
+          ffprobe -v error \
+            -show_entries format=duration:stream=codec_name,width,height,r_frame_rate,nb_frames \
+            -of json ./renders/hyperframes-gsap-smoke.mp4 | tee ./renders/ffprobe.json
+
+      - name: Upload render and diagnostic metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: hyperframes-gsap-smoke-preview
+          path: |
+            renders/hyperframes-gsap-smoke.mp4
+            renders/ffprobe.json
+          if-no-files-found: error
+          retention-days: 3
