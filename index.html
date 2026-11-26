@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HyperFrames + GSAP Smoke Test</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; width: 100%; height: 100%; overflow: hidden;
+      background: #17191d; color: #202226; font-family: Arial, sans-serif;
+    }
+    #root {
+      position: relative; width: 1920px; height: 1080px; overflow: hidden;
+      background: radial-gradient(ellipse at 78% 20%, rgba(196,157,91,.10), transparent 38%), #17191d;
+    }
+    .eyebrow { position: absolute; left: 120px; top: 88px; color: #aeb1b3;
+      font: 22px/1.2 monospace; letter-spacing: .18em; }
+    .record { position: absolute; left: 260px; top: 250px; width: 1400px; height: 620px;
+      padding: 76px 82px; border-radius: 22px; background: #f3f0e8;
+      box-shadow: 0 28px 80px rgba(0,0,0,.28); opacity: 0; }
+    .record-label { color: #77766f; font: 18px/1.2 monospace; letter-spacing: .16em; }
+    .separator { height: 1px; margin-top: 30px; background: #c9c5bc; }
+    .headline { margin: 72px 0 0; font-size: 76px; line-height: 1.06; font-weight: 600;
+      letter-spacing: -.035em; opacity: 0; }
+    .subline { margin-top: 28px; color: #686860; font-size: 30px; line-height: 1.35; }
+    .rule { width: 100%; height: 8px; margin-top: 54px; border-radius: 8px;
+      background: #d1cec6; transform: scaleX(0); transform-origin: left center; }
+    .signature { position: absolute; left: 82px; bottom: 66px; display: flex;
+      align-items: center; gap: 22px; color: #9a7745; font-size: 28px; font-weight: 600; }
+    .check { display: grid; place-items: center; width: 54px; height: 54px;
+      border: 2px solid #b18b4c; border-radius: 50%; font-size: 34px; }
+    .footer { position: absolute; right: 82px; bottom: 76px; color: #77766f;
+      font: 17px/1.5 monospace; opacity: 0; }
+    .accent-dot { position: absolute; right: 0; top: 0; width: 15px; height: 15px;
+      border-radius: 50%; background: #c49d5b; box-shadow: 0 0 24px rgba(196,157,91,.45);
+      opacity: 0; transform: scale(.4); }
+  </style>
+  <script src="./node_modules/gsap/dist/gsap.min.js"></script>
+</head>
+<body>
+  <div id="root" data-composition-id="root" data-start="0" data-width="1920" data-height="1080" data-fps="30">
+    <div class="eyebrow">RENDER TEST / HYPERFRAMES + GSAP</div>
+    <section id="record" class="record clip" data-start="0" data-duration="5" data-track-index="0">
+      <div class="record-label">RECORD / ILLUSTRATIVE</div>
+      <div class="separator"></div>
+      <h1 class="headline">A verified record.</h1>
+      <div class="subline">A five-second browser, animation and MP4 pipeline test.</div>
+      <div class="rule"></div>
+      <div class="signature"><span class="check">✓</span><span>Render pipeline ready</span></div>
+      <div class="footer">1920 × 1080<br>30 FRAMES / SECOND</div>
+      <div class="accent-dot"></div>
+    </section>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(".record",
+        { y: 36, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.75, ease: "power3.out" }, 0);
+      tl.fromTo(".headline",
+        { y: 18, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }, 0.45);
+      tl.to(".rule", { scaleX: 1, duration: 0.9, ease: "power2.out" }, 1.25);
+      tl.to(".footer", { opacity: 1, duration: 0.35 }, 3.25);
+      tl.to(".accent-dot",
+        { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.7)" }, 3.8);
+      window.__timelines = window.__timelines || {};
+      window.__timelines.root = tl;
+    </script>
+  </div>
+</body>
+</html>
